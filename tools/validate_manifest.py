@@ -35,7 +35,7 @@ DEFAULT_CONFIDENCE_WEIGHT_MULTIPLIERS = {
     "ready_reference": 1.0,
     "other": 0.2,
 }
-GOLD_REVIEW_LEVELS = {"user_confirmed_real_audio", "auto_screened_public_subtitle"}
+BENCHMARK_REVIEW_LEVELS = {"user_confirmed_real_audio", "auto_screened_public_subtitle"}
 PUNCT_RE = re.compile(r"[，。！？；：!?;:]|(?<!\d)[,.](?!\d)")
 
 
@@ -59,7 +59,7 @@ def warn(message: str) -> None:
 
 def confidence_weight_tier(case: dict) -> str:
     reference = case.get("reference", {})
-    if reference.get("review_level") in GOLD_REVIEW_LEVELS:
+    if reference.get("review_level") in BENCHMARK_REVIEW_LEVELS:
         return reference.get("review_level")
     if reference.get("status") == "ready":
         return "ready_reference"
@@ -67,7 +67,7 @@ def confidence_weight_tier(case: dict) -> str:
 
 
 def main() -> None:
-    manifest_path = sys.argv[1] if len(sys.argv) > 1 else "data/gold_manifest.v1.json"
+    manifest_path = sys.argv[1] if len(sys.argv) > 1 else "data/benchmark_manifest.v1.json"
     with open(manifest_path, "r", encoding="utf-8") as f:
         manifest = json.load(f)
 
@@ -119,8 +119,8 @@ def main() -> None:
         if "review_level" in ref and ref.get("review_level") not in VALID_REFERENCE_REVIEW_LEVEL:
             fail(f"{case_id}: invalid reference.review_level {ref.get('review_level')!r}")
         ref_path = ref.get("path")
-        if not ref_path or not ref_path.startswith("data/gold_references/"):
-            fail(f"{case_id}: reference.path must be under data/gold_references/")
+        if not ref_path or not ref_path.startswith("data/benchmark_references/"):
+            fail(f"{case_id}: reference.path must be under data/benchmark_references/")
 
         weight = case["weight"]
         if not isinstance(weight, (int, float)) or weight < 0:

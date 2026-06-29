@@ -165,8 +165,8 @@ def build_generate_cfg(args: argparse.Namespace, language: str, case_hotwords: l
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run FunASR AutoModel over local audio manifest.")
     parser.add_argument("--model", required=True)
-    parser.add_argument("--audio-manifest", default="data/audio/gold/audio_manifest.json")
-    parser.add_argument("--manifest", default="data/gold_manifest.v1.json")
+    parser.add_argument("--audio-manifest", default="data/audio/benchmark/audio_manifest.json")
+    parser.add_argument("--manifest", default="data/benchmark_manifest.v1.json")
     parser.add_argument("--out-dir", required=True)
     parser.add_argument("--max-cases", type=int)
     parser.add_argument("--case", action="append")

@@ -13,9 +13,9 @@
 
 ## 2. 数据分层
 
-### Gold Set
+### Benchmark Set
 
-正式结论只使用 Gold Set。Gold Set 可以来自两类确认路径：
+正式结论只使用 Benchmark Set。Benchmark Set 可以来自两类确认路径：
 
 - `reference.review_level = "user_confirmed_real_audio"`
 - `reference.review_level = "auto_screened_public_subtitle"`
@@ -24,9 +24,9 @@
 
 ### Backup / Ready Set
 
-内部维护时可以保留 reference 已整理完成、但尚未进入 Gold 的 backup/ready case，用于候选复查、工程验证和错误分析。公开仓库默认不包含这部分数据。
+内部维护时可以保留 reference 已整理完成、但尚未进入 benchmark 的 backup/ready case，用于候选复查、工程验证和错误分析。公开仓库默认不包含这部分数据。
 
-Backup/ready 不能和 Gold 混为一类解释；正式公开报告必须说明使用的 scope。
+Backup/ready 不能和 benchmark 混为一类解释；正式公开报告必须说明使用的 scope。
 
 ### Candidate Set
 
@@ -125,7 +125,7 @@ case 的 `hotwords` 应少而准，优先放业务中可能提前知道且容易
 
 - 不因为某个模型分数低而修改 reference。
 - 不把 prompt-context 结果和 native-hotword 结果混在同一排名。
-- 不把 Gold Set、Ready Set、Candidate Set 混成一个无法解释的总分。
+- 不把 Benchmark Set、Ready Set、Candidate Set 混成一个无法解释的总分。
 - 每次模型测试记录模型 ID、权重来源、量化方式、命令、语言参数、运行环境、运行日期和结果文件。
 - 每次规则变化后，保留旧结果可解释；必要时建立新的结果版本。
 - 评分脚本和 manifest 校验必须通过后，结果才可用于报告。
@@ -136,8 +136,8 @@ case 的 `hotwords` 应少而准，优先放业务中可能提前知道且容易
 
 - 模型版本和本地运行方式。
 - 覆盖的 case 集合和确认度分层。
-- Gold Set 分数。
-- 非 Gold 分数必须单独标记 scope；公开默认不发布非 Gold 集合。
+- Benchmark Set 分数。
+- 非 benchmark 分数必须单独标记 scope；公开默认不发布非 benchmark 集合。
 - zero-shot 与术语提示 / 热词结果分开。
 - 文本侧分数和性能侧分数分开。
 - 主要失败类型：漏转、幻觉、专名错误、数字错误、格式化问题、语言识别问题、长音频稳定性问题。
@@ -147,14 +147,14 @@ case 的 `hotwords` 应少而准，优先放业务中可能提前知道且容易
 
 短期目标：
 
-- 为每个 Gold case 生成 `case_card.md`，记录来源、片段、reference 状态、热词、ITN 域、复查记录和回测摘要。
-- 建立 Gold Set 专用 leaderboard。
+- 为每个 benchmark sample 生成 `case_card.md`，记录来源、片段、reference 状态、热词、ITN 域、复查记录和回测摘要。
+- 建立 Benchmark Set 专用 leaderboard。
 - 把 `text_score_90` 拆出更清晰的 raw / normalized 诊断字段，避免数学和 ITN 差异误伤 ASR 内容分。
 - 每新增或更新 ready case 自动运行 Qwen3-ASR-1.7B 4bit 回测。
 
 中期目标：
 
-- 扩充 Gold Set 到每个第一阶段主场景至少 5 条。
+- 扩充 Benchmark Set 到每个第一阶段主场景至少 5 条。
 - 增加更稳定的人工复查工作流：候选、草稿、用户确认、入池、回测、报告。
 - 对销售、会议、课堂分别建立更细的错误分类。
 - 对英语、中文、日语分别维护语言特定归一化规则。

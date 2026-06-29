@@ -104,8 +104,8 @@ def run_case(app_path: Path, item: dict, locale: str, mode: str, timeout_sec: fl
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run Apple Speech framework over a local ASR audio manifest.")
     parser.add_argument("--app", default="build/AppleSpeechTranscribe.app")
-    parser.add_argument("--audio-manifest", default="data/audio/gold/audio_manifest.json")
-    parser.add_argument("--manifest", default="data/gold_manifest.v1.json")
+    parser.add_argument("--audio-manifest", default="data/audio/benchmark/audio_manifest.json")
+    parser.add_argument("--manifest", default="data/benchmark_manifest.v1.json")
     parser.add_argument("--out-dir", required=True)
     parser.add_argument("--mode", choices=["on-device", "allow-server"], default="on-device")
     parser.add_argument("--timeout-sec", type=float, default=180.0)

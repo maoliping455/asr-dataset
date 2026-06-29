@@ -147,8 +147,8 @@ Qwen3-ASR 的本地 MLX 路径没有原生加权热词表；当前通过 `system
 每个 case 的原始 `weight` 表示场景和样本重要性。正式汇总时还会叠加确认度权重：
 
 - `user_confirmed_real_audio`：用户已听校确认的真实外部音频，`confidence_weight_multiplier = 3.0`。
-- `auto_screened_public_subtitle`：来自公开字幕/transcript，并通过严格自动筛选的 Gold case，`confidence_weight_multiplier = 2.0`。
-- `ready_reference`：内部使用的其他 ready reference，`confidence_weight_multiplier = 1.0`。公开 Gold-only 数据集默认不包含此层。
+- `auto_screened_public_subtitle`：来自公开字幕/transcript，并通过严格自动筛选的 benchmark sample，`confidence_weight_multiplier = 2.0`。
+- `ready_reference`：内部使用的其他 ready reference，`confidence_weight_multiplier = 1.0`。公开 curated benchmark dataset默认不包含此层。
 - `other`：未人工复核的候选、deferred case 或其他低可信样本，`confidence_weight_multiplier = 0.2`。
 
 最终汇总使用 `effective_weight = weight * confidence_weight_multiplier`。这样用户确认过的真实音频优先级最高，其余 ready case 其次，其他候选最低。

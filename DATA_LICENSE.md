@@ -1,8 +1,8 @@
 # Data License And Usage Notes
 
-This repository publishes a Gold-only ASR benchmark manifest and final reference transcripts for research, evaluation, and reproducibility.
+This repository publishes a curated ASR benchmark manifest and final reference transcripts for research, evaluation, and reproducibility.
 
-The repository does not redistribute third-party audio, video, or full subtitle assets. Source media remains owned by the original publishers on YouTube, Bilibili, or other public platforms. Users who rebuild local audio clips with `tools/materialize_gold_audio.py` are responsible for complying with the terms of the source platform and publisher.
+The repository does not redistribute third-party audio, video, or full subtitle assets. Source media remains owned by the original publishers on YouTube, Bilibili, or other public platforms. Users who rebuild local audio clips with `tools/materialize_audio.py` are responsible for complying with the terms of the source platform and publisher.
 
 Project-authored metadata, case selection, scoring scripts, and benchmark documentation are released under the MIT License unless otherwise noted.
 

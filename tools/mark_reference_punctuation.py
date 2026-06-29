@@ -26,7 +26,7 @@ def has_no_punctuation_reference(case: dict, root: Path) -> bool:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Mark ready references without sentence punctuation as punctuation=none.")
-    parser.add_argument("--manifest", default="data/gold_manifest.v1.json")
+    parser.add_argument("--manifest", default="data/benchmark_manifest.v1.json")
     parser.add_argument("--write", action="store_true", help="Update the manifest in place.")
     args = parser.parse_args()
 

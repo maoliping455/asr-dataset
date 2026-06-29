@@ -1,38 +1,32 @@
-# 个人 ASR Gold 测评集
+# 个人 ASR 测评集
 
 [English README](README_EN.md)
 
-这是一个面向真实本地 ASR 使用场景的个人开源测评集。仓库只公开最终 Gold 数据集、人工复核或严格自动筛选后的 reference、评分脚本和方法文档；不包含模型权重、音视频文件、下载缓存、候选集、草稿字幕或中间结果。
+这是一个面向真实使用场景的本地 ASR 测评集。它关注的问题很直接：如果你要把课堂视频、销售通话、会议录音、公开视频演讲或播客转成文字，哪些 ASR 模型在本地真正好用，哪些问题会影响后续总结、检索和笔记整理。
 
-## 包含内容
+这个项目不是公开排行榜复刻，也不是只看 WER/CER 的单一指标测试。它更像一套可复现的个人基准：样本来自真实公开视频和公开字幕/transcript，reference 经过人工复核或严格筛选，评分会同时看内容准确率、术语、数字、幻觉、标点，以及粤语/日语这类语言特定问题。
 
-- `data/gold_manifest.v1.json`：Gold-only 数据清单，包含来源 URL、片段范围、场景、语言、主指标、权重、热词和 reference 元数据。
-- `data/gold_references/`：每条 Gold case 的最终 reference 文本。
-- `tools/validate_manifest.py`：检查 manifest 结构和 reference 文件完整性。
-- `tools/summarize_dataset.py`：汇总数据集覆盖情况。
-- `tools/materialize_gold_audio.py`：根据公开视频 URL 和时间段在本地重建音频片段，用于复现模型测试。
-- `tools/score_transcript.py`：计算 CER/WER/hybrid TER、关键词、热词、数字、标点、幻觉、粤语繁简归一诊断、日语表记诊断等指标。
-- `docs/`：测评原则、指标定义、数据卡和模型优先级说明。
+## 适合谁
 
-## 数据集快照
+- 想在 Mac 或本地机器上比较开源 ASR 模型的人。
+- 需要课堂、会议、销售、访谈、播客转写质量基准的人。
+- 关心中文、英文、日语、粤语多语言 ASR 表现的人。
+- 希望用自己的模型输出跑一套可解释评分的人。
 
-截至 2026-06-29：
+## 数据覆盖
 
-- Gold case：202 条
-- 短音频 Gold：197 条
-- 长音频 Gold：5 条
+截至 2026-06-29，正式测试集包含 202 条样本：
+
+- 短音频样本：197 条
+- 长音频样本：5 条
 - 语言分布：英文 100、普通话中文 67、日语 25、粤语 10
-- 主要场景：学生课堂、销售/客服通话、会议/圆桌、公开视频演讲、访谈/播客、课程、工具演示、医疗/咨询、新闻叙事和长音频。
-- 来源：带平台字幕/transcript 或人工复核字幕草稿的公开 YouTube / Bilibili 视频。
+- 场景覆盖：学生课堂、销售/客服通话、会议/圆桌、公开视频演讲、访谈/播客、在线课程、工具演示、医疗/咨询、新闻叙事和长音频。
 
-Gold 确认层级：
-
-- `user_confirmed_real_audio`：项目作者或 assistant-led QA 已对真实音频进行复核并明确接受。
-- `auto_screened_public_subtitle`：reference 来自公开字幕/transcript，并通过严格自动筛选；本地 ASR 输出没有被用作 reference 文本。
+数据来源主要是公开 YouTube / Bilibili 视频。仓库保留来源 URL、片段时间段、场景标签、语言标签、热词和最终 reference 文本，便于其他人复现同样的测试。
 
 ## 快速开始
 
-安装核心评分依赖：
+安装依赖：
 
 ```bash
 python3 -m venv .venv
@@ -40,41 +34,41 @@ python3 -m venv .venv
 python -m pip install -r requirements.txt
 ```
 
-校验公开 Gold 数据集：
+检查数据集：
 
 ```bash
 python tools/validate_manifest.py
 python tools/summarize_dataset.py
 ```
 
-重建少量本地音频做 smoke test：
+重建少量音频片段做 smoke test：
 
 ```bash
-python tools/materialize_gold_audio.py --limit 3
+python tools/materialize_audio.py --limit 3
 ```
 
-脚本会在被 `.gitignore` 忽略的本地目录写入：
+音频会写到本地忽略目录：
 
 ```text
-data/audio/gold/audio_manifest.json
-data/audio/gold/<case_id>.wav
+data/audio/benchmark/audio_manifest.json
+data/audio/benchmark/<case_id>.wav
 ```
 
-部分 Bilibili 或 YouTube 来源可能需要地区访问或登录 cookies。可通过标准 `yt-dlp` 参数传入浏览器 cookies：
+部分 Bilibili 或 YouTube 来源可能需要地区访问或登录 cookies，可用：
 
 ```bash
-python tools/materialize_gold_audio.py --case <case_id> --cookies-from-browser chrome
+python tools/materialize_audio.py --case <case_id> --cookies-from-browser chrome
 ```
 
-## 测试一个 ASR 模型
+## 测试你的模型
 
-仓库不绑定某一个 ASR 模型。任意模型只要为每个 case 输出一个 UTF-8 文本文件，就可以评分：
+任意 ASR 模型都可以接入。只需要为每个 case 输出一个 UTF-8 文本文件：
 
 ```text
 predictions/my_model/<case_id>.txt
 ```
 
-对一个预测目录评分：
+批量评分：
 
 ```bash
 python tools/score_transcript.py \
@@ -82,7 +76,7 @@ python tools/score_transcript.py \
   --out results/my_model.score.json
 ```
 
-对单条 case 评分：
+单条评分：
 
 ```bash
 python tools/score_transcript.py \
@@ -90,7 +84,7 @@ python tools/score_transcript.py \
   --prediction predictions/my_model/youtube_bbc_ai_vocab_001.txt
 ```
 
-如果模型使用了 case 中的 `hotwords` 或上下文术语，需要和 zero-shot 结果分开汇报：
+如果模型使用了上下文术语或热词，请单独跑一份结果，不要和 zero-shot 混在一起：
 
 ```bash
 python tools/score_transcript.py \
@@ -99,7 +93,7 @@ python tools/score_transcript.py \
   --out results/my_model_with_context.score.json
 ```
 
-如果模型支持原生 decoder hotword 或 vocabulary bias，应使用：
+如果模型有原生热词表、decoder bias 或 vocabulary bias：
 
 ```bash
 python tools/score_transcript.py \
@@ -108,35 +102,42 @@ python tools/score_transcript.py \
   --out results/my_model_native_hotwords.score.json
 ```
 
-## 可复现约定
+## 怎么看分数
 
-这个公开仓库的目标是让其他用户不依赖私有中间文件，也能复现完整测评流程：
+核心输出是文本侧 90 分：
 
-1. 校验 `data/gold_manifest.v1.json`。
-2. 用 `tools/materialize_gold_audio.py` 根据来源 URL 和时间段重建本地音频。
-3. 用任意 ASR 模型处理 `data/audio/gold/audio_manifest.json`。
-4. 每个 case 保存一份预测文本。
-5. 用 `tools/score_transcript.py` 评分。
+- `weighted_text_score_90`：加权综合文本分，适合做本项目内模型对比。
+- `primary_error_rate`：每条样本的主错误率，中文/日语/粤语多用 CER，英文多用 WER。
+- `keyword_f1`：专名、产品名、术语、人名等关键内容是否识别对。
+- `number_f1`：数字、金额、时间、版本号等是否识别对。
+- `hallucination_score`：是否有过长输出、重复、静音幻觉等问题。
+- `script_normalized_text_score_90`：粤语繁简归一诊断，帮助区分内容错误和字形差异。
+- `japanese_orthographic_alias_text_score_90`：日语表记差异诊断，帮助区分听错和写法差异。
 
-仓库有意不重新分发音视频媒体，因为这些内容属于上游发布者。仓库保留来源 URL 和片段元数据用于复现。
+`weighted_text_score_90` 是本项目自己的综合分，不是业界统一标准。正式比较时建议同时看分语言、分场景明细，不要只看一个总分。
 
-## 评分说明
+## 复现说明
 
-- `weighted_text_score_90` 是本测评集自己的加权综合文本分，不是业界统一标准分。
-- CER/WER/hybrid TER 会保留在输出中，便于和常见 ASR 评估方式对照。
-- 粤语会额外输出繁简归一诊断分，用于区分“内容没听对”和“繁体/简体字形不一致”。
-- 日语会额外输出振假名/表记差异诊断分；明显错误的 reference 仍然应该修正或降级，不能靠诊断规则掩盖。
-- ITN/数学格式化单独观察；语义等价的数字或公式写法差异，不应直接解释为原始 ASR 声学识别失败。
+仓库不重新分发第三方音视频，因为这些内容属于原发布者。复现流程是：
 
-详细说明见 [docs/metrics.md](docs/metrics.md) 和 [docs/benchmark_principles.md](docs/benchmark_principles.md)。
+1. 使用 `data/benchmark_manifest.v1.json` 读取来源 URL 和时间段。
+2. 用 `tools/materialize_audio.py` 在本地重建音频片段。
+3. 用任意 ASR 模型生成预测文本。
+4. 用 `tools/score_transcript.py` 评分。
 
-## 不公开的内容
+这样可以避免把大文件、模型权重、下载缓存和账号状态放进仓库，同时保留足够的信息让别人复现同一批测试。
 
-- 模型权重和模型缓存。
-- 下载的音频、视频和字幕文件。
-- 浏览器 cookies 或账号状态。
-- 非 Gold 候选集、backup case、合成压力测试 manifest、草稿 reference、本地 ASR 草稿。
-- 完整模型预测目录和中间测评输出。
+## 目录
+
+- `data/benchmark_manifest.v1.json`：正式测试集清单。
+- `data/benchmark_references/`：最终 reference 文本。
+- `tools/materialize_audio.py`：从公开来源重建本地音频。
+- `tools/score_transcript.py`：评分脚本。
+- `tools/validate_manifest.py`：数据校验。
+- `tools/summarize_dataset.py`：数据分布汇总。
+- `docs/metrics.md`：指标定义。
+- `docs/benchmark_principles.md`：测评原则。
+- `docs/dataset_card.md`：数据卡。
 
 ## License
 

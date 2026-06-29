@@ -1,38 +1,32 @@
-# Personal ASR Gold Benchmark
+# Personal ASR Benchmark
 
 [中文 README](README.md)
 
-A personal open-source benchmark for real local ASR use cases. The dataset only publishes the final Gold set, reviewed or strictly screened references, scoring scripts, and methodology docs. It does not include model weights, audio/video files, download caches, candidate cases, draft subtitles, or intermediate outputs.
+This is a local ASR benchmark built around real user scenarios. It asks a practical question: if you want to transcribe class videos, sales calls, meeting recordings, public talks, or podcasts on a local machine, which ASR models actually work well, and which failure modes will affect summarization, search, and note-taking?
 
-## What Is Included
+This project is not a replica of a public leaderboard, and it is not a single WER/CER-only test. It is a reproducible personal benchmark: samples come from public videos and public subtitles/transcripts, references are reviewed or strictly screened, and scoring looks at content accuracy, terminology, numbers, hallucination, punctuation, plus language-specific issues for Cantonese and Japanese.
 
-- `data/gold_manifest.v1.json`: Gold-only manifest with source URL, segment range, scenario, language, metric, weight, hotwords, and reference metadata.
-- `data/gold_references/`: final reference transcript for every Gold case.
-- `tools/validate_manifest.py`: schema and reference integrity checks.
-- `tools/summarize_dataset.py`: dataset coverage summary.
-- `tools/materialize_gold_audio.py`: rebuild local audio clips from source URLs for reproducible model runs.
-- `tools/score_transcript.py`: CER/WER/hybrid TER, keyword, hotword, number, punctuation, hallucination, script-normalized Cantonese, and Japanese orthographic diagnostics.
-- `docs/`: benchmark principles, metric definitions, dataset card, and model comparison notes.
+## Who This Is For
 
-## Dataset Snapshot
+- People comparing open-source ASR models on Mac or local machines.
+- People who need benchmarks for classes, meetings, sales calls, interviews, and podcasts.
+- People who care about multilingual ASR across Chinese, English, Japanese, and Cantonese.
+- People who want to score their own ASR outputs with interpretable metrics.
 
-As of 2026-06-29:
+## Dataset Coverage
 
-- Gold cases: 202
-- Short-form Gold: 197
-- Long-form Gold: 5
+As of 2026-06-29, the benchmark includes 202 samples:
+
+- Short-form samples: 197
+- Long-form samples: 5
 - Languages: English 100, Mandarin Chinese 67, Japanese 25, Cantonese 10
-- Main scenarios: student lectures, sales/customer calls, meetings/panels, online talks, interviews/podcasts, courses, demos, healthcare/consultation, news/narrative, and long-form content.
-- Sources: public YouTube and Bilibili videos with platform subtitles/transcripts or user-reviewed subtitle drafts.
+- Scenarios: student lectures, sales/customer calls, meetings/panels, public talks, interviews/podcasts, online courses, tool demos, healthcare/consultation, news/narrative, and long-form audio.
 
-Gold confidence tiers:
-
-- `user_confirmed_real_audio`: reviewed against real audio by the project owner or assistant-led QA with explicit acceptance.
-- `auto_screened_public_subtitle`: reference comes from public subtitle/transcript text and passed strict automatic screening; local ASR output was not used as reference text.
+Sources are mainly public YouTube and Bilibili videos. The repository stores source URLs, segment timestamps, scenario labels, language labels, hotwords, and final reference text so others can reproduce the same benchmark.
 
 ## Quick Start
 
-Install core scoring dependencies:
+Install dependencies:
 
 ```bash
 python3 -m venv .venv
@@ -40,35 +34,35 @@ python3 -m venv .venv
 python -m pip install -r requirements.txt
 ```
 
-Validate the public Gold dataset:
+Validate the dataset:
 
 ```bash
 python tools/validate_manifest.py
 python tools/summarize_dataset.py
 ```
 
-Rebuild local audio clips for a smoke test:
+Rebuild a few local audio clips for a smoke test:
 
 ```bash
-python tools/materialize_gold_audio.py --limit 3
+python tools/materialize_audio.py --limit 3
 ```
 
-This writes ignored local files under `data/audio/gold/`, including:
+Audio is written to an ignored local directory:
 
 ```text
-data/audio/gold/audio_manifest.json
-data/audio/gold/<case_id>.wav
+data/audio/benchmark/audio_manifest.json
+data/audio/benchmark/<case_id>.wav
 ```
 
-Some Bilibili or YouTube sources may require region access or login cookies. In that case use standard `yt-dlp` options through:
+Some Bilibili or YouTube sources may require region access or login cookies:
 
 ```bash
-python tools/materialize_gold_audio.py --case <case_id> --cookies-from-browser chrome
+python tools/materialize_audio.py --case <case_id> --cookies-from-browser chrome
 ```
 
-## Running A Model
+## Evaluate Your Model
 
-The repository does not require one specific ASR model. Any model can be evaluated if it emits one UTF-8 text file per case:
+Any ASR model can be evaluated. Emit one UTF-8 text file per case:
 
 ```text
 predictions/my_model/<case_id>.txt
@@ -90,7 +84,7 @@ python tools/score_transcript.py \
   --prediction predictions/my_model/youtube_bbc_ai_vocab_001.txt
 ```
 
-If your model consumes case hotwords or context terms, keep those results separate from zero-shot results:
+If your model uses context terms or prompt-based hotwords, keep that result separate from zero-shot:
 
 ```bash
 python tools/score_transcript.py \
@@ -99,7 +93,7 @@ python tools/score_transcript.py \
   --out results/my_model_with_context.score.json
 ```
 
-Native decoder hotword or vocabulary-bias mechanisms should use:
+If your model has native hotword lists, decoder bias, or vocabulary bias:
 
 ```bash
 python tools/score_transcript.py \
@@ -108,35 +102,42 @@ python tools/score_transcript.py \
   --out results/my_model_native_hotwords.score.json
 ```
 
-## Reproducibility Contract
+## Reading The Scores
 
-The public repo is designed so another user can reproduce the benchmark workflow without private intermediate files:
+The main output is a 90-point text-side score:
 
-1. Validate `data/gold_manifest.v1.json`.
-2. Rebuild local audio from source URLs and segment timestamps with `tools/materialize_gold_audio.py`.
-3. Run any ASR model over `data/audio/gold/audio_manifest.json`.
-4. Save one transcript per case.
-5. Score with `tools/score_transcript.py`.
+- `weighted_text_score_90`: weighted aggregate text score for comparisons within this benchmark.
+- `primary_error_rate`: per-case primary error rate; Chinese/Japanese/Cantonese usually use CER, English usually uses WER.
+- `keyword_f1`: recall/precision for names, products, terms, and other key entities.
+- `number_f1`: accuracy for numbers, money, time, versions, and similar fields.
+- `hallucination_score`: penalties for overlong output, repetition, silence hallucination, and similar issues.
+- `script_normalized_text_score_90`: Cantonese diagnostic score after Traditional/Simplified normalization.
+- `japanese_orthographic_alias_text_score_90`: Japanese diagnostic score for acceptable writing variants.
 
-Audio/video media is intentionally excluded because it belongs to upstream publishers. Source URL and segment metadata are included for reproducibility.
+`weighted_text_score_90` is specific to this project. It is not an industry-wide standard score. For serious comparisons, look at language and scenario breakdowns instead of only one aggregate number.
 
-## Scoring Notes
+## Reproducibility
 
-- `weighted_text_score_90` is this benchmark's weighted aggregate, not an industry standard universal score.
-- CER/WER/hybrid TER remain visible so results can be compared with common ASR practice.
-- Cantonese gets an additional script-normalized diagnostic score to separate content recognition from Traditional/Simplified script mismatch.
-- Japanese gets diagnostic scores for common furigana/orthographic variants, while bad references should still be fixed or removed.
-- ITN/math formatting can be inspected separately; semantic-equivalent number or formula formatting should not be over-interpreted as raw ASR failure.
+The repository does not redistribute third-party audio/video because the media belongs to the original publishers. The reproducible workflow is:
 
-See [docs/metrics.md](docs/metrics.md) and [docs/benchmark_principles.md](docs/benchmark_principles.md).
+1. Read source URLs and segment timestamps from `data/benchmark_manifest.v1.json`.
+2. Rebuild local audio clips with `tools/materialize_audio.py`.
+3. Run any ASR model to produce prediction text.
+4. Score predictions with `tools/score_transcript.py`.
 
-## What Is Not Published
+This keeps large files, model weights, download caches, and account state out of the repository while preserving enough information to reproduce the same benchmark.
 
-- Model weights and model caches.
-- Downloaded audio/video/subtitle files.
-- Browser cookies or account state.
-- Non-Gold candidate cases, backup cases, synthetic stress manifests, draft references, and local ASR drafts.
-- Full per-model prediction directories and intermediate benchmark outputs.
+## Project Layout
+
+- `data/benchmark_manifest.v1.json`: benchmark manifest.
+- `data/benchmark_references/`: final reference transcripts.
+- `tools/materialize_audio.py`: rebuild local audio from public sources.
+- `tools/score_transcript.py`: scoring script.
+- `tools/validate_manifest.py`: dataset validation.
+- `tools/summarize_dataset.py`: dataset coverage summary.
+- `docs/metrics.md`: metric definitions.
+- `docs/benchmark_principles.md`: benchmark principles.
+- `docs/dataset_card.md`: dataset card.
 
 ## License
 

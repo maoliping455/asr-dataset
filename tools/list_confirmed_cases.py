@@ -5,7 +5,7 @@ import json
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="List user-confirmed real-audio ASR cases.")
-    parser.add_argument("--manifest", default="data/gold_manifest.v1.json")
+    parser.add_argument("--manifest", default="data/benchmark_manifest.v1.json")
     args = parser.parse_args()
 
     with open(args.manifest, "r", encoding="utf-8") as f:

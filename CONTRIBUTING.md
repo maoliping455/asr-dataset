@@ -1,17 +1,17 @@
 # Contributing
 
-Contributions should preserve the Gold-only public contract.
+Contributions should preserve the curated public benchmark contract.
 
 ## Accepted Contributions
 
 - Fix a reference typo with source evidence.
-- Add a new Gold case from public media that has an explicit subtitle or transcript source.
+- Add a new benchmark sample from public media that has an explicit subtitle or transcript source.
 - Improve scoring, validation, materialization, or documentation.
 - Add reproducible model-run instructions without committing model weights or predictions.
 
-## Gold Case Requirements
+## Benchmark Case Requirements
 
-Every new Gold case must include:
+Every new benchmark sample must include:
 
 - `case_id`
 - source URL and platform metadata
@@ -19,7 +19,7 @@ Every new Gold case must include:
 - language and scenario
 - primary error metric
 - `hotwords`, using `[]` when none are useful
-- final reference text under `data/gold_references/`
+- final reference text under `data/benchmark_references/`
 - `reference.status = "ready"`
 - `reference.review_level = "user_confirmed_real_audio"` or `auto_screened_public_subtitle`
 - `reference.punctuation = "none"` when the final reference intentionally has no sentence punctuation

@@ -6,7 +6,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_MANIFEST = "data/gold_manifest.v1.json"
+DEFAULT_MANIFEST = "data/benchmark_manifest.v1.json"
 
 
 def read_json(path: Path) -> dict:
@@ -96,19 +96,19 @@ def extract_segment(source_media: Path, out_audio: Path, case: dict, args: argpa
 def should_include(case: dict, args: argparse.Namespace) -> bool:
     if args.case and case["case_id"] not in set(args.case):
         return False
-    if args.short_only and case.get("case_type") == "real_long_gold":
+    if args.short_only and case.get("case_type") == "real_long_benchmark":
         return False
-    if args.long_only and case.get("case_type") != "real_long_gold":
+    if args.long_only and case.get("case_type") != "real_long_benchmark":
         return False
     return True
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Rebuild local audio clips for the public Gold ASR dataset from source URLs."
+        description="Rebuild local audio clips for the public benchmark ASR dataset from source URLs."
     )
     parser.add_argument("--manifest", default=DEFAULT_MANIFEST)
-    parser.add_argument("--out-dir", default="data/audio/gold")
+    parser.add_argument("--out-dir", default="data/audio/benchmark")
     parser.add_argument("--cache-dir", default="data/audio/source_cache")
     parser.add_argument("--case", action="append", help="Materialize one case_id. Can be repeated.")
     parser.add_argument("--limit", type=int)
@@ -167,7 +167,7 @@ def main() -> None:
 
     audio_manifest = {
         "source_manifest": rel(manifest_path),
-        "generated_by": "tools/materialize_gold_audio.py",
+        "generated_by": "tools/materialize_audio.py",
         "audio_root": rel(out_dir),
         "cases": materialized,
     }

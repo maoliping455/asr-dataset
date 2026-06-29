@@ -6,7 +6,7 @@ from pathlib import Path
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="List manifest cases that have not explicitly reviewed hotwords.")
-    parser.add_argument("--manifest", default="data/gold_manifest.v1.json")
+    parser.add_argument("--manifest", default="data/benchmark_manifest.v1.json")
     parser.add_argument("--ready-only", action="store_true")
     args = parser.parse_args()
 

@@ -7,8 +7,8 @@ from typing import Iterable
 
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_MANIFEST = "data/gold_manifest.v1.json"
-GOLD_REVIEW_LEVELS = {"user_confirmed_real_audio", "auto_screened_public_subtitle"}
+DEFAULT_MANIFEST = "data/benchmark_manifest.v1.json"
+BENCHMARK_REVIEW_LEVELS = {"user_confirmed_real_audio", "auto_screened_public_subtitle"}
 DEFAULT_BACKTEST_ROOTS = (
     ("qwen3_short", "results/qwen3_asr_1_7b_4bit_case_backtests"),
     ("qwen3_long_vad", "results/qwen3_asr_1_7b_4bit_long_audio_vad_chunked_backtests"),
@@ -26,17 +26,17 @@ def rel_path(path: str) -> Path:
     return ROOT / raw
 
 
-def is_gold(case: dict) -> bool:
+def is_benchmark(case: dict) -> bool:
     reference = case.get("reference") or {}
-    return reference.get("status") == "ready" and reference.get("review_level") in GOLD_REVIEW_LEVELS
+    return reference.get("status") == "ready" and reference.get("review_level") in BENCHMARK_REVIEW_LEVELS
 
 
 def case_bucket(case: dict) -> str:
-    if is_gold(case):
-        if case.get("case_type") == "real_long_gold":
-            return "gold_long"
-        return "gold_short"
-    if case.get("case_type") == "composed_gold_stress" or case.get("scenario") == "long_form_stress":
+    if is_benchmark(case):
+        if case.get("case_type") == "real_long_benchmark":
+            return "benchmark_long"
+        return "benchmark_short"
+    if case.get("case_type") == "composed_benchmark_stress" or case.get("scenario") == "long_form_stress":
         return "engineering_stress"
     reference = case.get("reference") or {}
     if reference.get("status") == "ready":
@@ -141,7 +141,7 @@ def summarize_group(name: str, cases: list[dict], roots: Iterable[tuple[str, str
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Summarize ASR dataset with Gold-first buckets.")
+    parser = argparse.ArgumentParser(description="Summarize ASR dataset with benchmark-first buckets.")
     parser.add_argument("--manifest", default=DEFAULT_MANIFEST)
     parser.add_argument("--limit", type=int, default=20)
     parser.add_argument("--json", action="store_true", help="Emit machine-readable JSON instead of text.")
@@ -180,9 +180,9 @@ def main() -> None:
 
     print(f"manifest: {args.manifest}")
     print(f"cases: {len(cases)}")
-    for name in ["gold_short", "gold_long", "backup_ready", "candidate_needs_reference", "candidate_deferred", "engineering_stress"]:
+    for name in ["benchmark_short", "benchmark_long", "backup_ready", "candidate_needs_reference", "candidate_deferred", "engineering_stress"]:
         print(f"{name}: {len(buckets.get(name, []))}")
-    for name in ["gold_short", "gold_long", "backup_ready", "candidate_needs_reference", "candidate_deferred", "engineering_stress"]:
+    for name in ["benchmark_short", "benchmark_long", "backup_ready", "candidate_needs_reference", "candidate_deferred", "engineering_stress"]:
         summarize_group(name, buckets.get(name, []), roots, args.limit)
 
 
