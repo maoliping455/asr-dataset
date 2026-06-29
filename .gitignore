@@ -1,0 +1,50 @@
+.DS_Store
+.asr_ref/
+.venv*/
+__pycache__/
+*.pyc
+
+# Local media, downloaded subtitles, and extraction caches.
+data/testset_manifest.v1.json
+data/testset_manifest.synthetic_100.json
+data/testset_manifest.long_audio_stress.json
+data/real_media_candidate_sources.v1.json
+data/self_recording_prompts.md
+data/references/
+data/backups/
+data/predictions/
+data/audio/
+data/extracted/
+data/raw_external/
+data/external_sources/
+external/
+work/
+tmp/
+build/
+
+# Model caches and weights.
+models/
+
+# Binary media.
+*.wav
+*.mp3
+*.m4a
+*.mp4
+*.m4s
+*.mov
+*.flac
+*.bin
+*.tar
+*.tar.gz
+*.tar.bz2
+
+# Credentials / local browser state.
+*cookies*.txt
+*.cookie
+
+# Local benchmark outputs and full per-case predictions.
+results/*
+!results/.gitkeep
+results/**/predictions/
+results/**/transcripts/
+results/**/chunks/
